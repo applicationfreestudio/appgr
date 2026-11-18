@@ -305,15 +305,15 @@ function formDraw(){const el=$("#frm");if(!el)return;const r=ready(),v=r.s,a=Mat
  const vd=v<35?["repos actif conseillé","var(--risk)"]:v<55?["séance réduite à 60 %","var(--warn)"]:v<75?["séance réduite à 80 %","var(--vigt)"]:["séance complète","var(--prog)"];
  el.innerHTML='<div class="fh"><b>Niveau de forme</b><span class="fv">'+v+'<small>/100</small></span></div><div class="fb" role="img" aria-label="Niveau de forme '+v+' sur 100"><i style="left:'+Math.min(99,Math.max(1,v))+'%"></i></div><p class="why"><b style="color:'+vd[1]+'">'+vd[0][0].toUpperCase()+vd[0].slice(1)+'</b><br>Récup. '+a+'/50 · énergie '+e+'/30 · courbatures '+c+'/20'+(w>0?'<br>Montre : récupération en cours −'+w:'')+'</p>'}
 function tpsDraw(T,c,ks){const e=$("#tps");if(!e)return;const w1=W1(),pl={marche:0,renfo:0,hiit:0};FUT.forEach(x=>{if(x.t<w1&&pl[x.type]!=null)pl[x.type]++});
- const F=d=>new Date(d).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric"}),S=SHp(),ep=k=>Math.round(T[k]*3/PL.per),tc=ks.reduce((s,k)=>s+c[k],0),te=ks.reduce((s,k)=>s+ep(k),0),ck=(a,b)=>a>=b?'<i class="okc" aria-label="fait">✓</i>':'';
- e.innerHTML='<div class="plh"><b>Plan d’entraînement sur '+PL.per+' jours</b><span class="rn" title="Séances faites depuis J−2 / prévues au plan sur cette partie de la période">'+ck(tc,te)+tc+'<small> / '+te+'</small></span></div><p class="pld">'+F(W0())+' → '+F(w1-1)+'</p>'
+ const F=d=>new Date(d).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric"}),S=SHp(),pb=(()=>{const d=new Date();d.setHours(0,0,0,0);return d.getTime()-(PL.per-1)*864e5})(),cp={marche:0,renfo:0,hiit:0};acts.forEach(a=>{if(a.t>=pb&&cp[a.type]!=null)cp[a.type]++});const ep=k=>T[k],tc=ks.reduce((s,k)=>s+cp[k],0),te=ks.reduce((s,k)=>s+T[k],0),ck=(a,b)=>a>=b?'<i class="okc" aria-label="fait">✓</i>':'';
+ e.innerHTML='<div class="plh"><b>Plan d’entraînement sur '+PL.per+' jours</b><span class="rn" title="Séances faites sur les '+PL.per+' derniers jours, aujourd’hui compris / prévues au plan">'+ck(tc,te)+tc+'<small> / '+te+'</small></span></div><p class="pld">'+F(W0())+' → '+F(w1-1)+'</p>'
   +'<div class="mix" aria-label="Répartition du plan">'+Object.keys(S).map(k=>'<div style="flex:'+S[k]+';background:'+CL[k]+'">'+LT[k]+' '+Math.round(S[k]*100)+' %</div>').join("")+'</div>'
   +ks.map(k=>{const p=pl[k],x=c[k]+p,ex=Math.max(0,x-T[k]);let d="";for(let i=0;i<T[k];i++)d+='<span class="dot'+(i<c[k]?' on':i<x?' pl':'')+'"></span>';if(ex){d+='<span class="dpl">+</span>';for(let i=0;i<ex;i++)d+='<span class="dot pl"></span>'}
-  return '<div class="tr"><b>'+LB[k]+'</b><div class="dots" style="color:'+CL[k]+'">'+(d||'–')+'</div><div class="rest"><span class="rn">'+ck(c[k],ep(k))+c[k]+'<small> / '+ep(k)+'</small></span></div></div>'}).join("")}
+  return '<div class="tr"><b>'+LB[k]+'</b><div class="dots" style="color:'+CL[k]+'">'+(d||'–')+'</div><div class="rest"><span class="rn">'+ck(cp[k],ep(k))+cp[k]+'<small> / '+ep(k)+'</small></span></div></div>'}).join("")}
 function viz(){formDraw();
  const L=LD(),P=L.P,T=Object.assign({},PL.n),c=done10(),S=SHp(),ks=Object.keys(T).sort((a,b)=>(T[b]-c[b])-(T[a]-c[a])),r0=ready(),b=["renfo","hiit","marche"].map(k=>Object.assign({k},relev(k,r0))).sort((x,y)=>y.v-x.v)[0];
  let h='<div class="best" id="best"></div>'+lbar(L)+'<div class="pls"><div id="tps"></div><details class="pad" id="pad"><summary id="pads">Détails du plan d’entraînement</summary><div id="padt"></div>'
-  +'<p class="why">Le plan ('+L.n+' séances sur '+PL.per+' jours, réglable dans Paramètres) couvre les 2 jours passés, aujourd’hui et les '+(PL.per-3)+' jours suivants. À droite : séances faites depuis J−2 sur le nombre prévu au plan pour ces 3 jours (au prorata), coche verte quand c’est atteint. Pastille pleine : séance faite ; en pointillé : séance prévue ; vide : séance du plan non placée ; « + » : séance ajoutée au plan.</p>'
+  +'<p class="why">Le plan ('+L.n+' séances sur '+PL.per+' jours, réglable dans Paramètres) couvre les 2 jours passés, aujourd’hui et les '+(PL.per-3)+' jours suivants. À droite : séances réellement faites sur les '+PL.per+' derniers jours, aujourd’hui compris, sur le nombre prévu au plan pour une période ; coche verte quand c’est atteint. Pastille pleine : séance faite ; en pointillé : séance prévue ; vide : séance du plan non placée ; « + » : séance ajoutée au plan.</p>'
   +(L.out?'<p class="why">Dont '+c.patin+' patinoire et '+c.base+' cardio base faites, comptées dans la charge mais jamais proposées.</p>':'')
   +(L.C>=5?'':'<p class="why">Historique de charge insuffisant (moins de 14 jours) : la prévision suit votre plan sans ajustement de charge.</p>')
   +(L.miss?'<p class="why">'+L.miss+' séance'+(L.miss>1?'s':'')+' sans TSS, comptée'+(L.miss>1?'s':'')+' à l’EPOC : relisez le dossier dans Paramètres pour lire le TSS.</p>':'')+'</details>'
@@ -502,7 +502,7 @@ async function pick(){
 $("#pk").onclick=()=>dir?readDir():pick();
 $("#pk2").onclick=pick;
 (async()=>{try{if(window.showDirectoryPicker){dir=await idb("get");if(dir){$("#dn").textContent="Dossier mémorisé : "+dir.name;$("#pk").textContent="Relire le dossier"}}}catch(e){}})();
-const VER="v261118.12";document.querySelectorAll(".ver").forEach(e=>e.textContent=VER);
+const VER="v261118.13";document.querySelectorAll(".ver").forEach(e=>e.textContent=VER);
 const setOpen=on=>{$("#set").hidden=!on;document.documentElement.classList.toggle("slock",on);if(on)$("#stc").focus();else $("#stb").focus()};
 $("#stb").onclick=()=>setOpen(true);$("#stc").onclick=()=>setOpen(false);
 document.addEventListener("click",e=>{if(e.target.closest("[data-open-set]")){e.preventDefault();setOpen(true)}});
